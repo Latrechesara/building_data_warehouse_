@@ -1,4 +1,11 @@
+import os
 import duckdb
+
+# Fetch credentials from environment variables (fallback to workflow defaults if needed)
+db_host = os.environ.get("DB_HOST", "127.0.0.1")
+db_user = os.environ.get("DB_USER", "root")
+db_password = os.environ.get("DB_PASSWORD", "password123")
+db_name = os.environ.get("DB_NAME", "northwind")
 
 # Supprimez ou laissez recréer dev.duckdb proprement
 conn = duckdb.connect("dev.duckdb")
@@ -8,7 +15,9 @@ conn.execute("INSTALL mysql;")
 conn.execute("LOAD mysql;")
 
 print("Connexion à la base MySQL...")
-conn.execute('ATTACH \'host=127.0.0.1 user=root password="rc13@#ch12345CULB!" database=northwind\' AS mysql_db (TYPE MYSQL);')
+# Connect dynamically using environment variables
+attach_query = f"ATTACH 'host={db_host} user={db_user} password={db_password} database={db_name}' AS mysql_db (TYPE MYSQL);"
+conn.execute(attach_query)
 
 # 1. Créer le schéma raw pour isoler les données brutes
 conn.execute("CREATE SCHEMA IF NOT EXISTS raw;")
