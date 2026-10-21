@@ -1,7 +1,7 @@
 import os
 import duckdb
 
-# Fetch credentials from environment variables (fallback to workflow defaults if needed)
+# Fetch credentials from environment variables
 db_host = os.environ.get("DB_HOST", "127.0.0.1")
 db_user = os.environ.get("DB_USER", "root")
 db_password = os.environ.get("DB_PASSWORD", "password123")
@@ -15,16 +15,15 @@ conn.execute("INSTALL mysql;")
 conn.execute("LOAD mysql;")
 
 print("Connexion à la base MySQL...")
-# Connect dynamically using environment variables
 attach_query = f"ATTACH 'host={db_host} user={db_user} password={db_password} database={db_name}' AS mysql_db (TYPE MYSQL);"
 conn.execute(attach_query)
 
 # 1. Créer le schéma raw pour isoler les données brutes
 conn.execute("CREATE SCHEMA IF NOT EXISTS raw;")
 
-# Cibler explicitement le schéma northwind dans la base attachée
+# Cibler explicitement le schéma northwind dans la base attachée et décoder les bytes en str si nécessaire
 tables_raw = conn.execute("SELECT table_name FROM mysql_db.information_schema.tables WHERE table_schema = 'northwind';").fetchall()
-tables = [row[0] for row in tables_raw]
+tables = [row[0].decode('utf-8') if isinstance(row[0], bytes) else str(row[0]) for row in tables_raw]
 
 print(f"Tables trouvées dans Northwind : {len(tables)} -> {tables}")
 
