@@ -41,11 +41,15 @@ jobs:
           uv pip install --system dbt-duckdb pymysql
           uv tool install dbt-charts
 
-      - name: Restore MySQL Dump
+      - name: Restore MySQL Schema and Data
         run: |
-          mysql -h 127.0.0.1 -P 3306 -u root -ppassword123 northwind < data/northwind.sql
+          mysql -h 127.0.0.1 -P 3306 -u root -ppassword123 northwind < northwind_dw/data/northwind.sql
+          mysql -h 127.0.0.1 -P 3306 -u root -ppassword123 northwind < northwind_dw/data/northwind-data.sql
 
       - name: Run Data Ingestion Script
+        defaults:
+          run:
+            working-directory: ./northwind_dw
         env:
           DB_HOST: 127.0.0.1
           DB_USER: root
@@ -54,11 +58,13 @@ jobs:
         run: python scripts/load_from_mysql.py
 
       - name: Run dbt Transformations & Data Tests
+        working-directory: ./northwind_dw
         run: |
           dbt run
           dbt test
 
       - name: Validate & Render dbt Charts HTML
+        working-directory: ./northwind_dw
         run: |
           dct validate
           mkdir -p target
@@ -68,4 +74,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target
+          publish_dir: ./northwind_dw/target
