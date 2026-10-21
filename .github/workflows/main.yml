@@ -62,8 +62,8 @@ jobs:
       - name: Run dbt Transformations & Data Tests
         run: |
           cd northwind_dw
-          dbt run
-          dbt test
+          dbt run --profiles-dir .
+          dbt test --profiles-dir .
 
       - name: Validate & Render dbt Charts HTML
         run: |
