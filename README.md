@@ -1,4 +1,3 @@
-Welcome to your new dbt project!
 # Modern Datawarehouse
 
 <p align="center">
