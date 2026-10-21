@@ -47,25 +47,22 @@ jobs:
           mysql -h 127.0.0.1 -P 3306 -u root -ppassword123 northwind < northwind_dw/data/northwind-data.sql
 
       - name: Run Data Ingestion Script
-        defaults:
-          run:
-            working-directory: ./northwind_dw
         env:
           DB_HOST: 127.0.0.1
           DB_USER: root
           DB_PASSWORD: password123
           DB_NAME: northwind
-        run: python scripts/load_from_mysql.py
+        run: cd northwind_dw && python scripts/load_from_mysql.py
 
       - name: Run dbt Transformations & Data Tests
-        working-directory: ./northwind_dw
         run: |
+          cd northwind_dw
           dbt run
           dbt test
 
       - name: Validate & Render dbt Charts HTML
-        working-directory: ./northwind_dw
         run: |
+          cd northwind_dw
           dct validate
           mkdir -p target
           dct render charts/analytics.yml --format html --output target/index.html
